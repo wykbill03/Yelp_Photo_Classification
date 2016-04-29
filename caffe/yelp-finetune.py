@@ -1,7 +1,6 @@
 
-# coding: utf-8
-
-# In[1]:
+# finetune model: extract parameters up to fc7 layer from pretrained model and
+#                 retrain rest of the layers using training photos
 
 caffe_root = '/home/ubuntu/caffe/' 
 yelp_root = '/home/ubuntu/caffe/yelp/'
@@ -19,15 +18,9 @@ from pylab import *
 get_ipython().magic(u'matplotlib inline')
 import tempfile
 
-
-# In[2]:
-
 import os
 weights = caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'
 assert os.path.exists(weights)
-
-
-# In[3]:
 
 from caffe import layers as L
 from caffe import params as P
@@ -102,8 +95,6 @@ def caffenet(data, label=None, train=True, num_classes=1000,
         return f.name
 
 
-# In[4]:
-
 def yelp_net(train=True, learn_all=False, subset=None, label=None):
     if train:
         source = yelp_root + 'input/train_label_' + str(label) + '.csv'
@@ -120,9 +111,7 @@ def yelp_net(train=True, learn_all=False, subset=None, label=None):
                     num_classes=2,
                     classifier_name='fc8_yelp')
 
-
-# In[5]:
-
+# define the solver
 from caffe.proto import caffe_pb2
 
 def solver(train_net_path, test_net_path=None, base_lr=0.001):
@@ -178,9 +167,7 @@ def solver(train_net_path, test_net_path=None, base_lr=0.001):
     with tempfile.NamedTemporaryFile(delete=False) as f:
         f.write(str(s))
         return f.name
-
-
-# In[6]:
+    
 
 def run_solvers(niter, solvers, disp_interval=100):
     """Run solvers for niter iterations,
@@ -208,9 +195,7 @@ def run_solvers(niter, solvers, disp_interval=100):
         s.net.save(weights[name])
     return loss, acc, weights
 
-
-# In[7]:
-
+# define test function
 def eval_yelp_net(weights, test_iters):
     test_net = caffe.Net(yelp_net(train=False), weights, caffe.TEST)
     accuracy = 0
@@ -223,9 +208,7 @@ def eval_yelp_net(weights, test_iters):
 
     return prob_result
 
-
-# In[ ]:
-
+# training process
 for label in range(1,2):
     print 'label: ' + str(label)
     niter = 1500  # number of iterations to train
@@ -258,7 +241,6 @@ for label in range(1,2):
     df_result.to_csv(yelp_root + 'output/prob_' + str(label) + '.csv')
 
 
-# In[ ]:
 
 
 
